@@ -1,0 +1,48 @@
+name: tests
+
+on:
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  
+  test:
+    strategy:
+      matrix:
+        go-version: 
+          - 1.17.x
+          - 1.18.x
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest      
+    runs-on: ${{ matrix.os }}
+    steps:
+
+      - name: Set environments
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+
+      - name: Start tests
+        id: all-tests
+        run: go test ./... -cover
+  
+  approve:
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+    
+      - name: Approve Pull Request
+        uses: hmarr/auto-approve-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.inputs.pullRequestNumber }}
+
