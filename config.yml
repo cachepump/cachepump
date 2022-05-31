@@ -4,30 +4,23 @@ version: '1.0'
 # Definition of all sources.
 sources:
 
-  # Name of a source. This name will be used as key parametor in http request.
-  test_key:
-
-    # Type of source [static, http].
-    type: static
-
-    # Cron rule for update data of this source, by default is '0 0 * * * *'.
+  # Static value
+  static_key:
     rule: '* * * * * *'
-
-    # Value for static source.
-    value: test_value
+    static: 
+      value: test_value
 
 
   # Definition of a http source
   ga_count_202103:
-    type: http
     rule: '0 */2 * * * *'
     http:
-      endpoint: http://analytics-dcb.sigma.sbrf.ru:8123
+      endpoint: http://0.0.0.0:8123
       method: POST
       header:
       auth:
-        user: AdminUser
-        password: 'n7C%het*jHFX3^kT!'
+        user: admin
+        password: 'adminadmin'
       body: >
         SELECT 
           sessionDate, 
@@ -36,3 +29,9 @@ sources:
         PREWHERE toYYYYMM(sessionDate) = 202103
         GROUP BY sessionDate
         ORDER BY sessionDate 
+  
+  # Definition of a source on base static file
+  file_go.sum:
+    rule: '0 */2 * * * *'
+    file:
+      path: go.sum

@@ -1,17 +1,18 @@
 package provider
 
 import (
-	"github.com/cachepump/cachepump/cache"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
+	"github.com/cachepump/cachepump/cache"
+
 	logger "github.com/AntonYurchenko/log-go"
 )
 
-// HttpSource define available fields for source with type = http.
-type HttpSource struct {
+// Http define available fields for http source.
+type Http struct {
 	Endpoint string      `yaml:"endpoint"`
 	Method   string      `yaml:"method"`
 	Auth     Auth        `yaml:"auth"`
@@ -30,17 +31,11 @@ func (a Auth) String() string {
 	return fmt.Sprintf(`{User:%[1]s Password:%[2]s}`, a.User, strings.Repeat("*", len(a.Password)))
 }
 
-// HttpPump generate an job function for updating data from http sources.
-func HttpPump(src *HttpSource, name string) func() {
-
-	if src == nil {
-		logger.Error("Invalid source with name %q. Section is not defined", name)
-		return func() {}
-	}
-
+// Pump generate an job function for updating data from http sources.
+func (h *Http) Pump(name string) func() {
 	return func() {
 
-		req, err := newRequest(src.Method, src.Endpoint, src.Body, name, src.Auth, src.Header)
+		req, err := newRequest(h.Method, h.Endpoint, h.Body, name, h.Auth, h.Header)
 		if err != nil {
 			logger.ErrorF("I cannot create http request, source name: %[1]q error: %[2]v", name, err)
 			return
