@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/cachepump/cachepump/cache"
@@ -20,6 +21,9 @@ type Http struct {
 	Body     string      `yaml:"body"`
 }
 
+// IsEmpty returns true if a structure is empty.
+func (h Http) IsEmpty() bool { return reflect.DeepEqual(h, Http{}) }
+
 // Auth is a structure for basic authentication.
 type Auth struct {
 	User     string `yaml:"user"`
@@ -32,7 +36,7 @@ func (a Auth) String() string {
 }
 
 // Pump generate an job function for updating data from http sources.
-func (h *Http) Pump(name string) func() {
+func (h Http) Pump(name string) func() {
 	return func() {
 
 		req, err := newRequest(h.Method, h.Endpoint, h.Body, name, h.Auth, h.Header)

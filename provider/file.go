@@ -12,8 +12,11 @@ type File struct {
 	Path string `yaml:"path"`
 }
 
+// IsEmpty returns true if a structure is empty.
+func (f File) IsEmpty() bool { return f == (File{}) }
+
 // Pump generate an job function for updating data from file sources.
-func (f *File) Pump(name string) func() {
+func (f File) Pump(name string) func() {
 	return func() {
 
 		bytes, err := ioutil.ReadFile(f.Path)
