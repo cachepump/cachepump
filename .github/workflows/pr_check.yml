@@ -1,4 +1,4 @@
-name: tests
+name: pr_check
 
 on:
   pull_request:
@@ -7,11 +7,11 @@ on:
 
 jobs:
   
+  # It starts all tests on Linux, macOS and Windows for GO version 1.18.
   test:
     strategy:
       matrix:
         go-version: 
-          - 1.17.x
           - 1.18.x
         os:
           - ubuntu-latest
@@ -32,6 +32,7 @@ jobs:
         id: all-tests
         run: go test ./... -cover
   
+  # If all tests has been successful this PR will approve automatic.
   approve:
     needs: test
     if: ${{ always() }}
