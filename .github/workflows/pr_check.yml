@@ -8,40 +8,78 @@ on:
 jobs:
   
   # It starts all tests on Linux, macOS and Windows for GO version 1.18.
-  test:
-    strategy:
-      matrix:
-        go-version: 
-          - 1.18.x
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest      
-    runs-on: ${{ matrix.os }}
+  test:      
+    runs-on: ubuntu-latest
     steps:
 
       - name: Set environments
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.18.x
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
 
       - name: Start tests
-        id: all-tests
-        run: go test ./... -cover
+        id: coverage
+        run: |
+          go test ./... -coverprofile=./coverage.out -covermode=count \
+          && echo "::set-output name=percent::$(go tool cover -func=./coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')" \
+          && rm ./coverage.out
+    
+    outputs:
+      coverage-percent: ${{ steps.coverage.outputs.percent }}
+
+  coverage_bage:
+    needs: test
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Calculation of a label color
+        id: color
+        env:
+          percent: ${{ needs.test.outputs.coverage-percent }}
+        run: |
+          if (( ${{ env.percent }} <= 30 )); then 
+            echo "::set-output name=val::red"
+          elif (( ${{ env.percent }} >= 80 )); then
+            echo "::set-output name=val::green"
+          else 
+            echo "::set-output name=val::yellow"
+          fi
+
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generation test covarege bage
+        env:
+          percent: ${{ needs.test.outputs.coverage-percent }}
+          label: ${{ steps.color.outputs.val }}
+          dir: ./.github/labels
+        run: |
+          mkdir -p ${{ env.dir }} \
+          && curl -X GET "https://img.shields.io/static/v1?style=flat&label=coverage&message=${{ env.percent }}%25&color=${{ env.label }}" \
+              -o ${{ env.dir }}/test_coverage.svg \
+          && git config user.name github-actions \
+          && git config user.email github-actions@github.com \
+          && git add ${{ env.dir }}/test_coverage.svg \
+          && git commit -m "[automated commit] Update of a test coverage bage" \
+          && git push
   
   # If all tests has been successful this PR will approve automatic.
   approve:
-    needs: test
-    if: ${{ always() }}
+    needs: coverage_bage
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
     
-      - name: Approve Pull Request
+      - name: Approve current pull request
         uses: hmarr/auto-approve-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
