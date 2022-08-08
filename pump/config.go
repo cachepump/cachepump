@@ -43,7 +43,7 @@ func uploadConfig(file string) (err error) {
 	err = yaml.NewDecoder(fl).Decode(&newConfig)
 	switch {
 	case err != nil:
-		logger.ErrorF("Configuretion has not been updated, error: %v", err)
+		logger.ErrorF("Configuration has not been updated, error: %v", err)
 	case newConfig.Version != "1.0":
 		logger.ErrorF("Version %s is not supported", newConfig.Version)
 	default:

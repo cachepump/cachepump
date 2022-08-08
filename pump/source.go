@@ -16,31 +16,25 @@ type Source struct {
 	FileSrc   provider.File   `yaml:"file"`
 }
 
-// getProviders returns list of all providers.
-func (src Source) getProviders() (prvs []provider.Provider) {
+// getProvider returns a first not nill and not empty provider.
+func (src Source) getProvider() (prv provider.Provider) {
 
 	// Supported providers.
 	source := reflect.ValueOf(src)
 	for i := 0; i < source.NumField(); i++ {
 		value := source.Field(i).Interface()
 		prv, ok := value.(provider.Provider)
-		if ok {
-			prvs = append(prvs, prv)
+		if ok && prv != nil && !prv.IsEmpty() {
+			return prv
 		}
 	}
 
 	// Default provider if all is empty.
-	return append(prvs, provider.EmptyProvider{})
+	return provider.EmptyProvider{}
 }
 
 // asFunc is a function which generates a function for scheduler.
 // A returned function should be update data from source in in memory cache.
 func (src Source) asFunc(name string) (fn func()) {
-	for _, p := range src.getProviders() {
-		if !p.IsEmpty() {
-			fn = p.Pump(name)
-			break
-		}
-	}
-	return fn
+	return src.getProvider().Pump(name)
 }
