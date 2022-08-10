@@ -70,10 +70,10 @@ jobs:
         env:
           percent: ${{ needs.test.outputs.coverage-percent }}
           label: ${{ steps.color.outputs.val }}
-          dir: ${{ steps.check-bage.dir }}
+          dir: ${{ steps.check-bage.env.dir }}
         run: |
           curl -X GET "https://img.shields.io/static/v1?style=flat&label=coverage&message=${{ env.percent }}%25&color=${{ env.label }}" \
-              -o ${{ env.dir }}/test_coverage.svg \
+              -o ${{ env.dir }}/test_coverage.svg
           if [ "$(md5 -q ${{ env.dir }}/test_coverage.svg)" != "${{ steps.check-bage.outputs.hash }}" ]; then
               git config user.name github-actions \
               && git config user.email github-actions@github.com \
