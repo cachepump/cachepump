@@ -34,13 +34,13 @@ func Test_uploadConfig(t *testing.T) {
 						Rule:      "* * * * * *",
 						StaticSrc: provider.Static{Value: "test_value"},
 					},
-					"ga_count_202103": {
+					"count_202103": {
 						Rule: "0 */2 * * * *",
 						HttpSrc: provider.Http{
 							Endpoint: "http://0.0.0.0:8123",
 							Method:   "POST",
 							Auth:     provider.Auth{User: "admin", Password: "adminadmin"},
-							Body:     "SELECT \n  sessionDate, \n  count() \nFROM GoogleAnalytics.Raw_Data PREWHERE toYYYYMM(sessionDate) = 202103 GROUP BY sessionDate ORDER BY sessionDate \n",
+							Body:     "SELECT date, count() FROM DB.Raw_Data PREWHERE toYYYYMM(date) = 202103 GROUP BY date ORDER BY date\n",
 						},
 					},
 					"file_go.sum": {

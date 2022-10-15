@@ -1,3 +1,6 @@
 .DS_Store
 .vscode
 *.out
+cachepump
+my_config.yml
+TODO.txt

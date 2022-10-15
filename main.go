@@ -15,7 +15,7 @@ import (
 // Application flags.
 var endpoint = flag.String("e", ":8080", "http endpoint")
 var logLevel = flag.String("l", "INFO", "level for log messages")
-var sourceFile = flag.String("s", "./config.yml", "path to yaml file with description of all sources")
+var sourceFile = flag.String("c", "./config.yml", "path to yaml file with description of all sources")
 
 func init() {
 	flag.Parse()
