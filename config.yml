@@ -4,6 +4,12 @@ version: '1.0'
 # Definition of all sources.
 sources:
 
+  # Exalple format
+  # name_of_key:                                     # It is a name of key for http request to cached data.
+  #   rule: '* * * * * *'                            # It is a cron rule for delivery data from source to cache.
+  #   type_of_source:                                # It is a type of supported source.
+  #      [: set of configuretion kays for source :]  # For each source you can set special configuration keys.
+
   # Static value
   static_key:
     rule: '* * * * * *'
@@ -12,7 +18,7 @@ sources:
 
 
   # Definition of a http source
-  ga_count_202103:
+  count_202103:
     rule: '0 */2 * * * *'
     http:
       endpoint: http://0.0.0.0:8123
@@ -22,13 +28,7 @@ sources:
         user: admin
         password: 'adminadmin'
       body: >
-        SELECT 
-          sessionDate, 
-          count() 
-        FROM GoogleAnalytics.Raw_Data
-        PREWHERE toYYYYMM(sessionDate) = 202103
-        GROUP BY sessionDate
-        ORDER BY sessionDate 
+        SELECT date, count() FROM DB.Raw_Data PREWHERE toYYYYMM(date) = 202103 GROUP BY date ORDER BY date
   
   # Definition of a source on base static file
   file_go.sum:
